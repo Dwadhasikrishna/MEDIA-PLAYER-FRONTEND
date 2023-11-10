@@ -5,6 +5,8 @@ import Form from 'react-bootstrap/Form';
 import { addAllCategory, deletecategory, getAVideo, getAllcategories, updateCategory } from '../Services/allAPI';
 import { Col, Row } from 'react-bootstrap';
 import VideoCard from './VideoCard';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 function Category() {
@@ -32,6 +34,7 @@ function Category() {
  //function to delete
  const deleteAcategory=async(id)=>{
   await deletecategory(id)
+  //to get the remaining categories
   allCategory()
  }
 
@@ -46,40 +49,50 @@ function Category() {
       const response = await addAllCategory(body)
       console.log(response);
       if(response.status>=200 && response.status<300){
-        alert('catogory added successfully')
+        toast.success('catogory added successfully')
         //state value is made null
         setCatogryName("")
         //close modal
         handleClose()
       }
       else{
-        alert('something went wrong')
+        toast.error('something went wrong')
       }
     }
     else{
-      alert('please enter catogory name')
+      toast.warning('please enter catogory name')
     }
    
   }
 
+
+  //function to prevent the reload.so that data that we send wont lost
   const dragOver= (e)=>{
     e.preventDefault()
   }
 
   const videoDrop = async(e,categoryId)=>{
-    console.log(`droped id ${categoryId}`);
-    //to get data sent from viewcard
-   let videoId = e.dataTransfer.getData('videoId')
+    console.log(`droped on the category Id ${categoryId}`);
+
+    //to get data sent from videocard
+   let videoId = e.dataTransfer.getData('videoID')
    console.log(videoId);
+   //get a video from backend
    const {data} = await getAVideo(videoId)
    console.log(data);
+   //get the id of the video from a selected category.Then we get the id of tha video from that selected category.
    const selectedCategory = category.find(item=>item.id===categoryId)
-   selectedCategory.allvideos.push(data)
+  //then push the all details from the selected category.so we need to push data into the particular array. 
+   selectedCategory.addvideos.push(data)
    console.log(selectedCategory);
 
+   //to update the category with new videos
    await updateCategory(categoryId,selectedCategory)
+   //to update automatically
    allCategory()
   }
+
+
   return (
     <>
     <div className='d-grid ms-3'>
@@ -90,12 +103,12 @@ function Category() {
       category?.map((item)=>(<div className='m-5 border border-secondary p-3 rounded'>
       <div className='d-flex justify-content-between align-items-center' droppable onDragOver={(e)=>dragOver(e)} onDrop={(e)=>videoDrop(e,item?.id)}>
       <h6>{item.categoryName}</h6>
-      <Button onClick={()=>deleteAcategory(item?.id)}  className='btn btn-danger '><i class="fa-solid fa-trash "></i></Button>
+      <Button onClick={()=>deleteAcategory(item?.id)}  className='btn btn-danger '><i class="fa-solid fa-trash-can "></i></Button>
       </div>
       <Row>
         <Col>
-        { item?.allvideos?.length > 0?
-        item?.allvideos?.map(card=>( <VideoCard displayVideo={card}/>))
+        { item?.addvideos?.length > 0?
+        item?.addvideos?.map(card=>( <VideoCard displayVideo={card}/>))
        : <p>Nothing to display</p>}
         </Col>
       </Row>
@@ -131,6 +144,7 @@ function Category() {
           <Button onClick={addCategory} variant="primary">Upload</Button>
         </Modal.Footer>
         </Modal>
+    <ToastContainer position='top-center' theme='colored' autoClose={2000}/>
     </>
    
   )

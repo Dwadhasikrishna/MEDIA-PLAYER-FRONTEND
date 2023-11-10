@@ -53,10 +53,12 @@ export const deletecategory = async(id)=>{
   return await commonAPI('DELETE',`${serverURL}/category/${id}`,{})
   }
 
-//to get a particular 
+//to get a particular video from  'http://localhost:5000/video'
+
 export const getAVideo =  async(id)=>{
-  return  await commonAPI('GET',`${serverURL}/video/${id}`,{})
+  return  await commonAPI('GET',`${serverURL}/video/${id}`,"")
 }
+
 
 //api to update the category with new videos
 
